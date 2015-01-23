@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
         capturedFrames++;
         
         //Waiting for the image to be saved.
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
         
         
         cout<<"Trying to open "<<CAPTURE_PATH<<", frame number "<<capturedFrames<<"\n";
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
             {
                 cerr<<"Error while reading "<<CAPTURE_PATH<<".\n"<<endl;
                 failures++;
-                if(failures > 100)
+                if(failures > 1000)
                 {
                     cout<<"More than 10 failures. Exiting...\n";
                     exit(1);
@@ -99,6 +99,7 @@ int main(int argc, char** argv) {
             else
             {
                 //Image opend successfully
+                cout<<"Frame number "<<capturedFrames<<" opened successfully.\n";
                 break;
             }
             
@@ -107,8 +108,9 @@ int main(int argc, char** argv) {
         
         std::string str = to_string(capturedFrames)+".jpg";
         
-        cout<<"Trying to rename "<<CAPTURE_PATH<<" to "<<str<<endl;
-        rename(CAPTURE_PATH, str.c_str());
+        cout<<"Trying to copy "<<CAPTURE_PATH<<" to "<<str<<endl;
+        std::string cmd = "cp /home/pi/ram/capture.jpg /home/pi/ram/"+str;
+        system(cmd.c_str());
         
         
 
