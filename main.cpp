@@ -5,17 +5,19 @@
 #include <chrono>
 #include <thread>
 
-#include <cstring>      // Needed for memset
-#include <sys/socket.h> // Needed for the socket functions
-#include <netdb.h>
-
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
+#include <cstring>      // Needed for memset
+#include <sys/socket.h> // Needed for the socket functions
+#include <netdb.h>
+#include <string>
+
 #define CAPTURE_PATH "/home/pi/ram/capture.jpg"
 #define SLEEP_MILLI 250
+
 using namespace cv;
 using namespace std;
 
@@ -58,21 +60,22 @@ bool connect();
  * @param msg The message to send to the server.
  * @return True if successfully sent.
  */
-bool send(string msg);
+bool send(std::string msg);
+
 
 int raspiStillPID = -1; //The PID of the child process exectuting raspistill.
 
 int status;
 struct addrinfo host_info; // The struct that getaddrinfo() fills up with data.
 struct addrinfo *host_info_list; // Pointer to the to the linked list of host_info's.
-string server_IP, socket_port;
+std::string server_IP, socket_port;
 int socket_d; // Socket descriptor
 
 int main(int argc, char** argv)
 {
 
     //The IP address is the first argument passed to the program.
-    if (argc < 2)
+    if (argc > 1)
         server_IP = argv[1];
     else
     {
@@ -81,7 +84,7 @@ int main(int argc, char** argv)
     }
 
     //The port is the second argument passed.
-    if (argc < 3)
+    if (argc > 2)
         socket_port = argv[2];
     else
     {
@@ -115,7 +118,9 @@ int main(int argc, char** argv)
     }
     
     send("Je suis Antho le petit robot !");
-
+    
+    return 0;
+    
 
     int iLowH = 0;
     int iHighH = 179;
@@ -267,6 +272,18 @@ void forkRaspistill()
     sleep(1);
 }
 
+bool capture()
+{
+    bool ret = true;
+    cout << "Sending SIGUSR1 signal to child process.\n";
+    if (kill(raspiStillPID, SIGUSR1) < 0)
+    {
+        cerr << "Error while sending signal.\n";
+        ret = false;
+    }
+    return ret;
+}
+
 bool initNetwork()
 {
     host_info.ai_family = AF_INET; // IP version not specified. Can be both.
@@ -283,18 +300,6 @@ bool initNetwork()
     }
     
     return true;
-}
-
-bool capture()
-{
-    bool ret = true;
-    cout << "Sending SIGUSR1 signal to child process.\n";
-    if (kill(raspiStillPID, SIGUSR1) < 0)
-    {
-        cerr << "Error while sending signal.\n";
-        ret = false;
-    }
-    return ret;
 }
 
 bool createSocket()
@@ -346,4 +351,7 @@ bool send(string msg)
     cout << "Message sucessfully sent to server." << endl;
     return true;
 }
+
+
+
 
