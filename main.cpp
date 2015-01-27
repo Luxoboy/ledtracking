@@ -62,6 +62,12 @@ bool connect();
  */
 bool send(std::string msg);
 
+/**
+ * @brief Processes the image and extracts the coordinates.
+ * @param img
+ */
+void processImage(Mat &img);
+
 
 int raspiStillPID = -1; //The PID of the child process exectuting raspistill.
 
@@ -98,51 +104,27 @@ int main(int argc, char** argv)
             "Sleep time between captures (ms):" << SLEEP_MILLI << endl <<
             "Server IP: " << server_IP << endl <<
             "Socket port used: " << socket_port << endl;
-    
-    if(!initNetwork())
+
+    if (!initNetwork())
     {
         cerr << "Error occured while initializing network configuration." << endl
                 << "Exiting..." << endl;
         exit(1);
     }
-    
-    if(!createSocket())
+
+    if (!createSocket())
     {
         cerr << "Error occured while creating the socket.\nExiting..." << endl;
         exit(1);
     }
-    
-    if(!connect())
+
+    if (!connect())
     {
         exit(1);
     }
-    
+
     send("Je suis Antho le petit robot !");
-    
-    return 0;
-    
 
-    int iLowH = 0;
-    int iHighH = 179;
-
-    int iLowS = 0;
-    int iHighS = 255;
-
-    int iLowV = 0;
-    int iHighV = 255;
-
-    /*
-    namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-    //Create trackbars in "Control" window
-    cvCreateTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
-    cvCreateTrackbar("HighH", "Control", &iHighH, 179);
-
-    cvCreateTrackbar("LowS", "Control", &iLowS, 255); //Saturation (0 - 255)
-    cvCreateTrackbar("HighS", "Control", &iHighS, 255);
-
-    cvCreateTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
-    cvCreateTrackbar("HighV", "Control", &iHighV, 255);
-     */
 
     forkRaspistill();
     int capturedFrames = 0;
@@ -166,7 +148,7 @@ int main(int argc, char** argv)
         int failures = 0;
         do
         {
-            imgOriginal = imread(CAPTURE_PATH, CV_LOAD_IMAGE_COLOR);
+            imgOriginal = imread(CAPTURE_PATH);
             if (imgOriginal.data == NULL)
             {
                 cerr << "Error while reading " << CAPTURE_PATH << ".\n" << endl;
@@ -185,66 +167,19 @@ int main(int argc, char** argv)
             }
 
         } while (true);
+        
+        processImage(imgOriginal);
+
+        /*
 
         std::string str = to_string(capturedFrames) + ".jpg";
 
         cout << "Trying to copy " << CAPTURE_PATH << " to " << str << endl;
         std::string cmd = "cp /home/pi/ram/capture.jpg /home/pi/ram/" + str;
         system(cmd.c_str());
-
-
-
-        /*
-        vector<KeyPoint> points;
-        //FASTX(imgThresholded, points, 200, false, FastFeatureDetector::TYPE_9_16);
-
-        SimpleBlobDetector::Params par;
-        par.filterByCircularity = false;
-        par.filterByColor = true;
-        par.blobColor = 0;
-        //par.thresholdStep = 200;
-        //par.minThreshold = 200;
-        //par.maxThreshold = 255;
-        SimpleBlobDetector blobD(par);
-        //blobD.create("SimpleBlobDetector");
-        blobD.detect(imgOriginal, points);
-        for (int i = 0; i < points.size(); i++) {
-            KeyPoint p = points.at(i);
-            printf("x=%f, y=%f, size=%d\n", p.pt.x, p.pt.y, p.size);
-            break;
-        }
-
-        cv::Mat blobImg;
-        cv::drawKeypoints(imgOriginal, points, blobImg);
-        //cv::imshow("Blobs", blobImg);
-
          */
-        Mat imgHSV;
-        Mat gray;
-        cvtColor(imgOriginal, gray, CV_RGB2GRAY);
 
-
-        //imshow("N&B", gray);
-        cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-
-        Mat imgThresholded;
-
-        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
-
-
-
-        //morphological opening (remove small objects from the foreground)
-        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
-        dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
-
-        //morphological closing (fill small holes in the foreground)
-        dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
-        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
-
-        imshow("Thresholded Image", imgThresholded); //show the thresholded image
-        imshow("Original", imgOriginal); //show the original image
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_MILLI));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_MILLI));
     }
 
     return 0;
@@ -288,9 +223,9 @@ bool initNetwork()
 {
     host_info.ai_family = AF_INET; // IP version not specified. Can be both.
     host_info.ai_socktype = SOCK_STREAM; // Use SOCK_STREAM for TCP or SOCK_DGRAM for UDP.
-    
+
     memset(&host_info, 0, sizeof host_info);
-    
+
     status = getaddrinfo(server_IP.c_str(), socket_port.c_str(), &host_info, &host_info_list);
 
     if (status != 0)
@@ -298,7 +233,7 @@ bool initNetwork()
         cout << "Error setting the network structures with getadrinfo." << endl;
         return false;
     }
-    
+
     return true;
 }
 
@@ -313,7 +248,7 @@ bool createSocket()
         cout << "Failed to create the socket." << endl;
         return false;
     }
-    
+
     cout << "Socket created successfully." << endl;
     return true;
 }
@@ -327,31 +262,65 @@ bool connect()
         cout << "Failed to connect to server." << endl;
         return false;
     }
-    
+
     cout << "Successfully connected to server." << endl;
     return true;
 }
 
 bool send(string msg)
 {
-    if(status == -1)
+    if (status == -1)
     {
         cout << "Not connected to server, cannot send message." << endl;
         return false;
     }
-    
+
     int res = send(socket_d, msg.c_str(), msg.size(), 0);
-    
-    if(res != msg.size())
+
+    if (res != msg.size())
     {
         cerr << "Error occured when sending message to server." << endl;
         return false;
     }
-    
+
     cout << "Message sucessfully sent to server." << endl;
     return true;
 }
 
+void processImage(Mat &imgOriginal)
+{
+    Mat imgHSV;
 
+    cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+    
+    Mat imgThresholded;
 
+    inRange(imgHSV, Scalar(0, 0, 255), Scalar(179, 255, 255), imgThresholded); //Threshold the image
+    
+    vector<vector <Point> > contours;
+    
+    findContours(imgThresholded, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
+    cout << "Contours foud: " << contours.size() << endl;
+
+    for (vector<Point> vec : contours)
+    {
+
+        Moments omoments = moments(vec);
+
+        double dM01 = omoments.m01;
+        double dM10 = omoments.m10;
+        double dArea = omoments.m00;
+        cout << "dArea" << dArea << endl;
+
+        // if the area <= 10000, I consider that the there are no object in the image and it's because of the noise, the area is not zero 
+        if (dArea > 0)
+        {
+            //calculate the position of the ball
+            int posX = dM10 / dArea;
+            int posY = dM01 / dArea;
+
+            cout << "x: " << posX << ", y: " << posY << endl;
+        }
+    }
+}
