@@ -18,6 +18,9 @@
 #define CAPTURE_PATH "/home/pi/ram/capture.jpg"
 #define SLEEP_MILLI 250
 
+#define CAPTURE_WIDTH_DEFAULT 800
+#define CAPTURE_HEIGHT_DEFAULT 800
+
 using namespace cv;
 using namespace std;
 
@@ -68,6 +71,8 @@ bool send(std::string msg);
  */
 void processImage(Mat &img);
 
+int CAPTURE_WIDTH = CAPTURE_WIDTH_DEFAULT,
+        CAPTURE_HEIGHT = CAPTURE_HEIGHT_DEFAULT;
 
 int raspiStillPID = -1; //The PID of the child process exectuting raspistill.
 
@@ -88,6 +93,7 @@ int main(int argc, char** argv)
         cout << "No address IP passed, setting default value." << endl;
         server_IP = "10.42.0.1";
     }
+    
 
     //The port is the second argument passed.
     if (argc > 2)
@@ -97,10 +103,24 @@ int main(int argc, char** argv)
         socket_port = "3000";
         cout << "No socket port passed, setting default value." << endl;
     }
+    
+    //The captured image width is the third argument passed.
+    if(argc > 3)
+    {
+        CAPTURE_WIDTH = atoi(argv[3]);
+    }
+    
+    //The captured image height is the fourth argument passed.
+    if(argc > 4)
+    {
+        CAPTURE_HEIGHT = atoi(argv[4]);
+    }
 
 
     cout << "Params :\n"
             "Capture path: " << CAPTURE_PATH << endl <<
+            "Captured image: width=" << CAPTURE_WIDTH << "px, height=" <<
+            CAPTURE_HEIGHT << endl <<
             "Sleep time between captures (ms):" << SLEEP_MILLI << endl <<
             "Server IP: " << server_IP << endl <<
             "Socket port used: " << socket_port << endl;
@@ -198,7 +218,9 @@ void forkRaspistill()
     if (raspiStillPID == 0)
     {
         cout << "Fork successful. Executing raspistill.\n";
-        if (execl("/usr/bin/raspistill", "raspistill", "-t", "0", "-s", "-o", CAPTURE_PATH, NULL) < 0)
+        if (execl("/usr/bin/raspistill", "raspistill", "-w", to_string(CAPTURE_WIDTH).c_str(), 
+                "-h", to_string(CAPTURE_HEIGHT).c_str(), "-t", "0", "-s", "-o", 
+                CAPTURE_PATH, NULL) < 0)
         {
             cerr << "Error executing raspistill. Terminating child process...\n";
             exit(1);
