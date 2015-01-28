@@ -143,7 +143,7 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    send("Je suis Antho le petit robot !");
+    //send("Je suis Antho le petit robot !");
 
 
     forkRaspistill();
@@ -317,12 +317,12 @@ void processImage(Mat &imgOriginal)
     
     Mat imgThresholded;
 
-    inRange(imgHSV, Scalar(0, 0, 255), Scalar(179, 255, 255), imgThresholded); //Threshold the image
+    inRange(imgHSV, Scalar(0, 0, 240), Scalar(179, 20, 255), imgThresholded); //Threshold the image
     imwrite("/home/pi/ram/thresh.jpg", imgThresholded);
     
     vector<vector <Point> > contours;
     
-    findContours(imgThresholded, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    findContours(imgThresholded, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
     cout << "Contours foud: " << contours.size() << endl;
 
@@ -336,7 +336,6 @@ void processImage(Mat &imgOriginal)
         double dArea = omoments.m00;
         cout << "dArea" << dArea << endl;
         int posX, posY;
-        // if the area <= 10000, I consider that the there are no object in the image and it's because of the noise, the area is not zero 
         if (dArea != 0)
         {
             //calculate the position of the ball
