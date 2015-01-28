@@ -8,7 +8,7 @@
 #ifndef ROBOT_H
 #define	ROBOT_H
 
-#define MAX_TRAVEL_DISTANCE 0.1 // Maximum distance a robot can travel in m/s.
+#define MAX_TRAVEL_DISTANCE 0.1 // Maximum distance a robot can travel in 1 second in m.
 
 #include <string>
 #include <vector>
@@ -17,6 +17,11 @@
 class Robot
 {
 public:
+    /**
+     * Constructs a Robot with current position.
+     * @param x_current
+     * @param y_current
+     */
     Robot(int x_current, int y_current);
     Robot(const Robot& orig);
     virtual ~Robot();
@@ -41,9 +46,21 @@ public:
         return ratio;
     }
     
+    /**
+     * Sets the ratio between pixels and meter.
+     * @param ration
+     */
     static void setRatio(double ration);
 
-    void setPosition(int x_current, int y_current);
+    
+    /**
+     * Checks if position is correct according to ratio. If so, it sets the 
+     * current position.
+     * @param x
+     * @param y
+     * @return True if position was accepted.
+     */
+    bool tryPosition(double x, double y);
     
     std::string toJSON();
     
@@ -58,6 +75,8 @@ private:
     static std::vector<Robot*> robots; //Vector of robots
     
     std::chrono::steady_clock::time_point lastTime;
+    
+    void setPosition(int x_current, int y_current); 
 
 };
 
