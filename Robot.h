@@ -8,42 +8,52 @@
 #ifndef ROBOT_H
 #define	ROBOT_H
 
-class Robot {
+#include <string>
+#include <vector>
+
+class Robot
+{
 public:
-    Robot();
+    Robot(int x_current, int y_current);
     Robot(const Robot& orig);
     virtual ~Robot();
-
-    int GetId() const {
+    
+    int getId() const
+    {
         return id;
     }
 
-    int GetX() const {
+    int getX() const
+    {
         return x_current;
     }
 
-    void SetX(int x_current) {
-        this->x_last = this->x_current;
-        this->x_current = x_current;
-    }
-
-    int GetY() const {
+    int getY() const
+    {
         return y_current;
     }
-
-    void SetY(int y_current) {
-        this->y_last = this->y_current;
-        this->y_current = y_current;
+    
+    static double getRatio()
+    {
+        return ratio;
     }
     
-    
+    static void setRatio(double ration);
 
-    static double ratio;
-    static int numberRobots;
+    void setY(int y_current);
+    void setX(int x_current);
+    
+    std::string toJSON();
+    
+    static std::string robotsToJSON();
+
+
 private:
     int id;
     int x_current, y_current; // The current positions of the robot.
     int x_last, y_last; //The previous positions (previous capture).
+    static double ratio; //The number of pixels it takes to make a meter.
+    static std::vector<Robot*> robots; //Vector of robots
 
 };
 
