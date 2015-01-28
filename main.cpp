@@ -52,8 +52,10 @@ void processImage(Mat &img);
  */
 void argSetting(int argc, char* argv[]);
 
+
 int CAPTURE_WIDTH = CAPTURE_WIDTH_DEFAULT,
         CAPTURE_HEIGHT = CAPTURE_HEIGHT_DEFAULT;
+
 
 int raspiStillPID = -1; //The PID of the child process exectuting raspistill.
 
@@ -78,7 +80,7 @@ int main(int argc, char** argv)
             CAPTURE_HEIGHT << endl <<
             "Sleep time between captures (ms):" << SLEEP_MILLI << endl <<
             "Server IP: " << server_IP << endl <<
-            "Socket port used: " << socket_port <<
+            "Socket port used: " << socket_port << endl <<
             "- - - - - - - -" << endl << endl;
 
     if (!initNetwork())
@@ -153,7 +155,7 @@ void argSetting(int argc, char* argv[])
     else
     {
         cout << "No address IP passed, setting default value." << endl;
-        server_IP = "10.42.0.1";
+        server_IP = DEFAULT_SERVER_IP;
     }
 
 
@@ -162,7 +164,7 @@ void argSetting(int argc, char* argv[])
         socket_port = argv[2];
     else
     {
-        socket_port = "3000";
+        socket_port = DEFAULT_SOCKET_PORT;
         cout << "No socket port passed, setting default value." << endl;
     }
 

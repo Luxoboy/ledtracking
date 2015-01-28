@@ -6,6 +6,9 @@
 #include <netdb.h>
 #include <string>
 
+#define DEFAULT_SERVER_IP 192.168.1.3
+#define DEFAULT_SOCKET_PORT 3000
+
 /**
  * @brief Init the network configuration.
  * @return False if an error occured.
