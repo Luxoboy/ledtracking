@@ -71,13 +71,15 @@ int main(int argc, char** argv)
     }
 
 
-    cout << "Params :\n"
+    cout << "- - - - - - - - - -" << endl <<
+            "Params :\n"
             "Capture path: " << CAPTURE_PATH << endl <<
             "Captured image: width=" << CAPTURE_WIDTH << "px, height=" <<
             CAPTURE_HEIGHT << endl <<
             "Sleep time between captures (ms):" << SLEEP_MILLI << endl <<
             "Server IP: " << server_IP << endl <<
-            "Socket port used: " << socket_port << endl;
+            "Socket port used: " << socket_port <<
+            "- - - - - - - -" << endl << endl;
 
     if (!initNetwork())
     {
