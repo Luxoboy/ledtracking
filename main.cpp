@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <chrono>
 #include <thread>
+#include <pthread.h>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
@@ -66,6 +67,13 @@ bool connect();
 bool send(std::string msg);
 
 /**
+ * Thread method that listens to incoming messages.
+ * @param arg
+ * @return 
+ */
+void *recvThread(void* arg);
+
+/**
  * @brief Processes the image and extracts the coordinates.
  * @param img
  */
@@ -81,6 +89,8 @@ struct addrinfo host_info; // The struct that getaddrinfo() fills up with data.
 struct addrinfo *host_info_list; // Pointer to the to the linked list of host_info's.
 std::string server_IP, socket_port;
 int socket_d; // Socket descriptor
+pthread_mutex_t mutex_buf;
+bool messageReceived;
 
 int main(int argc, char** argv)
 {
@@ -115,6 +125,15 @@ int main(int argc, char** argv)
     {
         CAPTURE_HEIGHT = atoi(argv[4]);
     }
+    
+    mutex_buf = PTHREAD_MUTEX_INITIALIZER;
+    messageReceived = false;
+    
+    if(pthread_mutex_init(&mutex_buf, NULL) != 0)
+    {
+        cerr << "Error while intializing buffer mutex.\nExiting..." << endl;
+        return 0;
+    }
 
 
     cout << "Params :\n"
@@ -142,10 +161,19 @@ int main(int argc, char** argv)
     {
         exit(1);
     }
+    
+    send("{\"idModule\": \"localisation\", \"robots\":[[1.0,1.0]]}");
+    
+    char receivingBuffer[1000];
+    //pthread_t receivingThread;
+    /*
+    if(pthread_create(&receivingThread, NULL, recvThread, receivingBuffer) != 0)
+    {
+        cerr << "Error while creating receiving thread.\nExiting..." << endl;
+        return 0;
+    }*/
 
-    //send("Je suis Antho le petit robot !");
-
-
+    //sleep(10);
     forkRaspistill();
     int capturedFrames = 0;
     while (true)
@@ -189,15 +217,6 @@ int main(int argc, char** argv)
         } while (true);
         
         processImage(imgOriginal);
-
-        /*
-
-        std::string str = to_string(capturedFrames) + ".jpg";
-
-        cout << "Trying to copy " << CAPTURE_PATH << " to " << str << endl;
-        std::string cmd = "cp /home/pi/ram/capture.jpg /home/pi/ram/" + str;
-        system(cmd.c_str());
-         */
 
         //std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_MILLI));
     }
@@ -349,5 +368,28 @@ void processImage(Mat &imgOriginal)
         }
 
             cout << "x: " << posX << ", y: " << posY << endl;
+    }
+    
+    drawContours(imgOriginal, contours, -1, Scalar(255,0,0));
+    imwrite("/home/pi/ram/contours.jpg", imgOriginal);
+}
+
+void *recvThread(void *arg)
+{
+    char* buf = (char*)arg;
+    int socket_d_loc = socket_d;
+    
+    cout<< "Listening thread created successfully.\nListening...\n";
+    while(true)
+    {
+        pthread_mutex_lock(&mutex_buf);
+        int res = recv(socket_d_loc, buf, 1000, MSG_DONTWAIT);
+        
+        if(res != -1)
+        {
+            messageReceived = true;
+            cout << "Message received:\n" << buf <<endl;
+        }
+        pthread_mutex_unlock(&mutex_buf);
     }
 }
