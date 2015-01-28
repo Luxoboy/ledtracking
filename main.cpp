@@ -11,10 +11,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
-#include <cstring>      // Needed for memset
-#include <sys/socket.h> // Needed for the socket functions
-#include <netdb.h>
-#include <string>
+#include "network.h"
 
 #define CAPTURE_PATH "/home/pi/ram/capture.jpg"
 #define SLEEP_MILLI 250
@@ -40,38 +37,7 @@ void forkRaspistill();
  */
 bool capture();
 
-/**
- * @brief Init the network configurations.
- * @return False if an error occured.
- * Set the structures.
- */
-bool initNetwork();
 
-/**
- * @brief Creates the socket to the server.
- * @return True if successfully created.
- */
-bool createSocket();
-
-/**
- * @brief Connects to the server.
- * @return True is successfully connected.
- */
-bool connect();
-
-/**
- * @brief Send a message to the server.
- * @param msg The message to send to the server.
- * @return True if successfully sent.
- */
-bool send(std::string msg);
-
-/**
- * Thread method that listens to incoming messages.
- * @param arg
- * @return 
- */
-void *recvThread(void* arg);
 
 /**
  * @brief Processes the image and extracts the coordinates.
@@ -79,57 +45,26 @@ void *recvThread(void* arg);
  */
 void processImage(Mat &img);
 
+/**
+ * Sets variables from arguments passed.
+ * @param argc
+ * @param argv
+ */
+void argSetting(int argc, char* argv[]);
+
 int CAPTURE_WIDTH = CAPTURE_WIDTH_DEFAULT,
         CAPTURE_HEIGHT = CAPTURE_HEIGHT_DEFAULT;
 
 int raspiStillPID = -1; //The PID of the child process exectuting raspistill.
 
-int status;
-struct addrinfo host_info; // The struct that getaddrinfo() fills up with data.
-struct addrinfo *host_info_list; // Pointer to the to the linked list of host_info's.
-std::string server_IP, socket_port;
-int socket_d; // Socket descriptor
-pthread_mutex_t mutex_buf;
-bool messageReceived;
-
 int main(int argc, char** argv)
 {
-
-    //The IP address is the first argument passed to the program.
-    if (argc > 1)
-        server_IP = argv[1];
-    else
-    {
-        cout << "No address IP passed, setting default value." << endl;
-        server_IP = "10.42.0.1";
-    }
-    
-
-    //The port is the second argument passed.
-    if (argc > 2)
-        socket_port = argv[2];
-    else
-    {
-        socket_port = "3000";
-        cout << "No socket port passed, setting default value." << endl;
-    }
-    
-    //The captured image width is the third argument passed.
-    if(argc > 3)
-    {
-        CAPTURE_WIDTH = atoi(argv[3]);
-    }
-    
-    //The captured image height is the fourth argument passed.
-    if(argc > 4)
-    {
-        CAPTURE_HEIGHT = atoi(argv[4]);
-    }
+    argSetting(argc, argv);
     
     mutex_buf = PTHREAD_MUTEX_INITIALIZER;
     messageReceived = false;
-    
-    if(pthread_mutex_init(&mutex_buf, NULL) != 0)
+
+    if (pthread_mutex_init(&mutex_buf, NULL) != 0)
     {
         cerr << "Error while intializing buffer mutex.\nExiting..." << endl;
         return 0;
@@ -148,26 +83,10 @@ int main(int argc, char** argv)
     {
         cerr << "Error occured while initializing network configuration." << endl
                 << "Exiting..." << endl;
-        exit(1);
+        return 0;
     }
 
-    if (!createSocket())
-    {
-        cerr << "Error occured while creating the socket.\nExiting..." << endl;
-        exit(1);
-    }
-
-    if (!connect())
-    {
-        exit(1);
-    }
-    
-    send("{\"idModule\": \"localisation\", \"robots\":[[1.0,1.0]]}\n");
-    
-    char receivingBuffer[1000];
-    pthread_t receivingThread;
-    
-    if(pthread_create(&receivingThread, NULL, recvThread, receivingBuffer) != 0)
+    if (pthread_create(&receivingThread, NULL, recvThread, receivingBuffer) != 0)
     {
         cerr << "Error while creating receiving thread.\nExiting..." << endl;
         return 0;
@@ -178,7 +97,6 @@ int main(int argc, char** argv)
     int capturedFrames = 0;
     while (true)
     {
-
         if (!capture())
         {
             continue;
@@ -215,7 +133,7 @@ int main(int argc, char** argv)
             }
 
         } while (true);
-        
+
         processImage(imgOriginal);
 
         //std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_MILLI));
@@ -223,6 +141,40 @@ int main(int argc, char** argv)
 
     return 0;
 
+}
+
+void argSetting(int argc, char* argv[])
+{
+    //The IP address is the first argument passed to the program.
+    if (argc > 1)
+        server_IP = argv[1];
+    else
+    {
+        cout << "No address IP passed, setting default value." << endl;
+        server_IP = "10.42.0.1";
+    }
+
+
+    //The port is the second argument passed.
+    if (argc > 2)
+        socket_port = argv[2];
+    else
+    {
+        socket_port = "3000";
+        cout << "No socket port passed, setting default value." << endl;
+    }
+
+    //The captured image width is the third argument passed.
+    if (argc > 3)
+    {
+        CAPTURE_WIDTH = atoi(argv[3]);
+    }
+
+    //The captured image height is the fourth argument passed.
+    if (argc > 4)
+    {
+        CAPTURE_HEIGHT = atoi(argv[4]);
+    }
 }
 
 void forkRaspistill()
@@ -237,8 +189,8 @@ void forkRaspistill()
     if (raspiStillPID == 0)
     {
         cout << "Fork successful. Executing raspistill.\n";
-        if (execl("/usr/bin/raspistill", "raspistill", "-w", to_string(CAPTURE_WIDTH).c_str(), 
-                "-h", to_string(CAPTURE_HEIGHT).c_str(), "-t", "0", "-s", "-o", 
+        if (execl("/usr/bin/raspistill", "raspistill", "-w", to_string(CAPTURE_WIDTH).c_str(),
+                "-h", to_string(CAPTURE_HEIGHT).c_str(), "-t", "0", "-s", "-o",
                 CAPTURE_PATH, "-q", "100", NULL) < 0)
         {
             cerr << "Error executing raspistill. Terminating child process...\n";
@@ -260,87 +212,19 @@ bool capture()
     return ret;
 }
 
-bool initNetwork()
-{
-    host_info.ai_family = AF_INET; // IP version not specified. Can be both.
-    host_info.ai_socktype = SOCK_STREAM; // Use SOCK_STREAM for TCP or SOCK_DGRAM for UDP.
-
-    memset(&host_info, 0, sizeof host_info);
-
-    status = getaddrinfo(server_IP.c_str(), socket_port.c_str(), &host_info, &host_info_list);
-
-    if (status != 0)
-    {
-        cout << "Error setting the network structures with getadrinfo." << endl;
-        return false;
-    }
-
-    return true;
-}
-
-bool createSocket()
-{
-    cout << "Trying to create a socket..." << endl;
-    socket_d = socket(host_info_list->ai_family, host_info_list->ai_socktype,
-            host_info_list->ai_protocol);
-
-    if (socket_d == -1)
-    {
-        cout << "Failed to create the socket." << endl;
-        return false;
-    }
-
-    cout << "Socket created successfully." << endl;
-    return true;
-}
-
-bool connect()
-{
-    cout << "Trying to connect to server." << endl;
-    status = connect(socket_d, host_info_list->ai_addr, host_info_list->ai_addrlen);
-    if (status == -1)
-    {
-        cout << "Failed to connect to server." << endl;
-        return false;
-    }
-
-    cout << "Successfully connected to server." << endl;
-    return true;
-}
-
-bool send(string msg)
-{
-    if (status == -1)
-    {
-        cout << "Not connected to server, cannot send message." << endl;
-        return false;
-    }
-
-    int res = send(socket_d, msg.c_str(), msg.size(), 0);
-
-    if (res != msg.size())
-    {
-        cerr << "Error occured when sending message to server." << endl;
-        return false;
-    }
-
-    cout << "Message sucessfully sent to server." << endl;
-    return true;
-}
-
 void processImage(Mat &imgOriginal)
 {
     Mat imgHSV;
 
     cvtColor(imgOriginal, imgHSV, COLOR_RGB2HSV); //Convert the captured frame from BGR to HSV
-    
+
     Mat imgThresholded;
 
     inRange(imgHSV, Scalar(0, 0, 240), Scalar(179, 20, 255), imgThresholded); //Threshold the image
     imwrite("/home/pi/ram/thresh.jpg", imgThresholded);
-    
+
     vector<vector <Point> > contours;
-    
+
     findContours(imgThresholded, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
     cout << "Contours foud: " << contours.size() << endl;
@@ -360,37 +244,16 @@ void processImage(Mat &imgOriginal)
             //calculate the position of the ball
             posX = dM10 / dArea;
             posY = dM01 / dArea;
-        }
-        else
+        } else
         {
             posX = vec.at(0).x;
             posY = vec.at(0).y;
         }
 
-            cout << "x: " << posX << ", y: " << posY << endl;
+        cout << "x: " << posX << ", y: " << posY << endl;
     }
-    
-    drawContours(imgOriginal, contours, -1, Scalar(255,0,0));
+
+    drawContours(imgOriginal, contours, -1, Scalar(255, 0, 0));
     imwrite("/home/pi/ram/contours.jpg", imgOriginal);
 }
 
-void *recvThread(void *arg)
-{
-    char* buf = (char*)arg;
-    int socket_d_loc = socket_d;
-    
-    cout<< "Listening thread created successfully.\nListening...\n";
-    while(true)
-    {
-        pthread_mutex_lock(&mutex_buf);
-        int res = recv(socket_d_loc, buf, 1000, MSG_DONTWAIT);
-        
-        if(res != -1)
-        {
-            buf[res] = '\0';
-            messageReceived = true;
-            cout << "Message received:\n" << buf <<endl;
-        }
-        pthread_mutex_unlock(&mutex_buf);
-    }
-}
