@@ -220,7 +220,7 @@ void forkRaspistill()
         cout << "Fork successful. Executing raspistill.\n";
         if (execl("/usr/bin/raspistill", "raspistill", "-w", to_string(CAPTURE_WIDTH).c_str(), 
                 "-h", to_string(CAPTURE_HEIGHT).c_str(), "-t", "0", "-s", "-o", 
-                CAPTURE_PATH, NULL) < 0)
+                CAPTURE_PATH, "-q", "100", NULL) < 0)
         {
             cerr << "Error executing raspistill. Terminating child process...\n";
             exit(1);
@@ -313,11 +313,12 @@ void processImage(Mat &imgOriginal)
 {
     Mat imgHSV;
 
-    cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+    cvtColor(imgOriginal, imgHSV, COLOR_RGB2HSV); //Convert the captured frame from BGR to HSV
     
     Mat imgThresholded;
 
     inRange(imgHSV, Scalar(0, 0, 255), Scalar(179, 255, 255), imgThresholded); //Threshold the image
+    imwrite("/home/pi/ram/thresh.jpg", imgThresholded);
     
     vector<vector <Point> > contours;
     
@@ -334,15 +335,20 @@ void processImage(Mat &imgOriginal)
         double dM10 = omoments.m10;
         double dArea = omoments.m00;
         cout << "dArea" << dArea << endl;
-
+        int posX, posY;
         // if the area <= 10000, I consider that the there are no object in the image and it's because of the noise, the area is not zero 
-        if (dArea > 0)
+        if (dArea != 0)
         {
             //calculate the position of the ball
-            int posX = dM10 / dArea;
-            int posY = dM01 / dArea;
+            posX = dM10 / dArea;
+            posY = dM01 / dArea;
+        }
+        else
+        {
+            posX = vec.at(0).x;
+            posY = vec.at(0).y;
+        }
 
             cout << "x: " << posX << ", y: " << posY << endl;
-        }
     }
 }
