@@ -7,8 +7,6 @@
 
 #include "Robot.h"
 
-#include <string>
-
 using namespace std;
 
 double Robot::ratio = -1.0;
@@ -17,8 +15,7 @@ vector<Robot*> Robot::robots = vector<Robot*>();
 Robot::Robot(int x_current, int y_current)
     : x_current(0), y_current(0)
 {
-    setX(x_current);
-    setY(y_current);
+    setPosition(x_current, y_current);
     
     robots.push_back(this);
 }
@@ -38,22 +35,21 @@ Robot::~Robot()
 {
 }
 
-void Robot::setY(int y_current)
-{
-    if (y_current > 0)
-    {
-        this->y_last = this->y_current;
-        this->y_current = y_current;
-    }
-}
-
-void Robot::setX(int x_current)
+void Robot::setPosition(int x_current, int y_current)
 {
     if (x_current > 0)
     {
         this->x_last = this->x_current;
         this->x_current = x_current;
     }
+    
+    if (y_current > 0)
+    {
+        this->y_last = this->y_current;
+        this->y_current = y_current;
+    }
+    
+    lastTime = chrono::steady_clock.now();
 }
 
 string Robot::toJSON()

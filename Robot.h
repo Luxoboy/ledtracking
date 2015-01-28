@@ -8,8 +8,11 @@
 #ifndef ROBOT_H
 #define	ROBOT_H
 
+#define MAX_TRAVEL_DISTANCE 0.1 // Maximum distance a robot can travel in m/s.
+
 #include <string>
 #include <vector>
+#include <chrono>
 
 class Robot
 {
@@ -40,8 +43,7 @@ public:
     
     static void setRatio(double ration);
 
-    void setY(int y_current);
-    void setX(int x_current);
+    void setPosition(int x_current, int y_current);
     
     std::string toJSON();
     
@@ -54,6 +56,8 @@ private:
     int x_last, y_last; //The previous positions (previous capture).
     static double ratio; //The number of pixels it takes to make a meter.
     static std::vector<Robot*> robots; //Vector of robots
+    
+    std::chrono::steady_clock::time_point lastTime;
 
 };
 
