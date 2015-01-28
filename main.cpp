@@ -162,18 +162,18 @@ int main(int argc, char** argv)
         exit(1);
     }
     
-    send("{\"idModule\": \"localisation\", \"robots\":[[1.0,1.0]]}");
+    send("{\"idModule\": \"localisation\", \"robots\":[[1.0,1.0]]}\n");
     
     char receivingBuffer[1000];
-    //pthread_t receivingThread;
-    /*
+    pthread_t receivingThread;
+    
     if(pthread_create(&receivingThread, NULL, recvThread, receivingBuffer) != 0)
     {
         cerr << "Error while creating receiving thread.\nExiting..." << endl;
         return 0;
-    }*/
+    }
 
-    //sleep(10);
+    sleep(10);
     forkRaspistill();
     int capturedFrames = 0;
     while (true)
@@ -387,6 +387,7 @@ void *recvThread(void *arg)
         
         if(res != -1)
         {
+            buf[res] = '\0';
             messageReceived = true;
             cout << "Message received:\n" << buf <<endl;
         }
