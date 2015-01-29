@@ -32,10 +32,12 @@ void processImage(Mat &imgOriginal)
     computeMoments(vec_moments, contours);
     
     uint ind_robot = 0;
+    
+    vector<Moments>::iterator it = vec_moments.begin();
 
-    for (Moments m : vec_moments)
+    while(!vec_moments.empty())
     {
-
+        Moments m = *it;
         double dM01 = m.m01;
         double dM10 = m.m10;
         double dArea = m.m00;
@@ -43,21 +45,30 @@ void processImage(Mat &imgOriginal)
         int posX, posY;
         if (dArea != 0)
         {
-            //calculate the position of the ball
             posX = dM10 / dArea;
             posY = dM01 / dArea;
-            Robot r = Robot::getRobot(ind_robot);
-            r.tryPosition(posX, posY);
-            
-            if(++ind_robot == Robot::numberOfRobots())
-                break;
+            Robot* r = Robot::getRobot(ind_robot);
+            if(!r->tryPosition(posX, posY))
+            {
+                it++;
+            }
+            else
+            {
+                vec_moments.erase(it);
+                if(++ind_robot == Robot::numberOfRobots())
+                    break;
+            }
         }
-        
-        cout << "x: " << posX << ", y: " << posY << endl;
+        else
+        {
+            vec_moments.erase(it);
+        }
     }
     send(Robot::robotsToJSON());
     drawContours(imgOriginal, contours, -1, Scalar(255, 0, 0));
     imwrite("/home/pi/ram/contours.jpg", imgOriginal);
+    int a;
+    //cin >> a;
 }
 
 void captureLoop()

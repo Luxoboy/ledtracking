@@ -21,7 +21,6 @@ Robot::Robot(int x_current, int y_current)
     setPosition(x_current, y_current);
     id = robots.size();
     robots.push_back(this);
-    
 }
 
 Robot::Robot(const Robot& orig)
@@ -44,30 +43,28 @@ void Robot::setRatio(double ratio)
     Robot::ratio = ratio;
 }
 
-void Robot::setPosition(int x_current, int y_current)
+void Robot::setPosition(int x, int y)
 {
-    if (x_current > 0)
-    {
-        this->x_last = this->x_current;
-        this->x_current = x_current;
-    }
+    x_last = x_current;
+    x_current = x;
 
-    if (y_current > 0)
-    {
-        this->y_last = this->y_current;
-        this->y_current = y_current;
-    }
-
+    y_last = y_current;
+    y_current = y;
+    cout << "[ROBOT] " << id << ": coordinates successfully updated to " <<
+            x_current << ", " << y_current << endl;
     lastTime = steady_clock::now();
 }
 
 string Robot::toJSON()
 {
+    cout << "[ROBOT] " << id << ": exporting to JSON.\nCurrent coordinates : " <<
+            x_current << ", " << y_current << endl;
     string ret = "{\"id\":";
     ret += to_string(id);
     ret += ",\"x\":";
-    ret += to_string((double) (this->x_current) / ratio) + ",";
-    ret += "\"y\":"+to_string((double) (this->y_current) / ratio) + "}";
+    ret += to_string(((double) (x_current) / ratio)*100.0) + ",";
+    ret += "\"y\":" + to_string(((double) (y_current) / ratio)*100) + "}";
+    cout << "JSON: " << ret << endl;
     return ret;
 }
 
@@ -93,24 +90,24 @@ bool Robot::tryPosition(double x, double y)
 
     if (travelledDistance > MAX_TRAVEL_DISTANCE * durationSeconds)
     {
+        cout << "[ROBOT] " << id << ": failed to update coordinates.\n";
         return false;
     }
     setPosition(x, y);
     return true;
 }
 
-Robot& Robot::getRobot(uint id)
+Robot* Robot::getRobot(uint id)
 {
-    if(id < robots.size())
+    if (id < robots.size())
     {
-        return *robots.at(id);
+        return robots.at(id);
     }
-    return *robots.at(0);
+    return NULL;
 }
 
 uint Robot::numberOfRobots()
-    {
-        cout << "Number of robots: " << robots.size() << endl;
-        return robots.size();
-    }
+{
+    return robots.size();
+}
 

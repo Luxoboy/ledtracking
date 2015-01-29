@@ -26,7 +26,7 @@ public:
     Robot(const Robot& orig);
     virtual ~Robot();
     
-    static Robot& getRobot(uint id);
+    static Robot* getRobot(uint id);
     
     int getId() const
     {
@@ -80,7 +80,7 @@ private:
     
     std::chrono::steady_clock::time_point lastTime;
     
-    void setPosition(int x_current, int y_current); 
+    void setPosition(int x, int y); 
 
 };
 

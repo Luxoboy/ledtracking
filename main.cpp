@@ -57,8 +57,8 @@ int main(int argc, char** argv)
     }
 
     forkRaspistill();
-    Robot::setRatio(500);
-    Robot r(0,0), r2(10,10);
+    Robot::setRatio(427);
+    Robot* r = new Robot(0,0), *r2 = new Robot(10,10);
     
     captureLoop();
 
