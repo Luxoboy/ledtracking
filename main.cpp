@@ -40,7 +40,7 @@ int main(int argc, char** argv)
             CAPTURE_HEIGHT << endl <<
             "Server IP: " << server_IP << endl <<
             "Socket port used: " << socket_port << endl <<
-            "- - - - - - - -" << endl << endl;
+            "- - - - - - - - - -" << endl << endl;
 
     if (!initNetwork())
     {
@@ -122,7 +122,7 @@ void forkRaspistill()
     sleep(1);
 }
 
-bool capture()
+bool captureSignal()
 {
     bool ret = true;
     cout << "Sending SIGUSR1 signal to child process.\n";

@@ -75,15 +75,15 @@ void captureLoop()
     int capturedFrames = 0;
     while (true)
     {
-        if (!capture())
+        if (!captureSignal())
         {
-            continue;
+            return;
         }
 
         capturedFrames++;
 
         //Waiting for the image to be saved.
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 
         cout << "Trying to open " << CAPTURE_PATH << ", frame number " << capturedFrames << "\n";

@@ -24,7 +24,7 @@ void forkRaspistill();
  * This method simply sends a SIGUSR1 signal to the raspitill process, triggering
  * the capture of a new frame.
  */
-bool capture();
+bool captureSignal();
 
 /**
  * Sets variables from arguments passed.

@@ -8,7 +8,7 @@
 #ifndef ROBOT_H
 #define	ROBOT_H
 
-#define MAX_TRAVEL_DISTANCE 100 // Maximum distance a robot can travel in 1 second in m.
+#define MAX_TRAVEL_DISTANCE 0.5 // Maximum distance a robot can travel in 1 second in m.
 
 #include <string>
 #include <vector>
