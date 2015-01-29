@@ -1,6 +1,8 @@
 #ifndef GLOBAL_H
 #define	GLOBAL_H
 
+#include "json/json.h"
+
 #define CAPTURE_PATH "/home/pi/ram/capture.jpg"
 
 #define CAPTURE_WIDTH_DEFAULT 800
@@ -18,6 +20,8 @@ extern int raspiStillPID; //The PID of the child process exectuting raspistill.
  */
 void forkRaspistill();
 
+void killRaspistill();
+
 /**
  * @brief Capture new picture.
  * @return True if the signal was successfully sent.
@@ -33,7 +37,13 @@ bool captureSignal();
  */
 void argSetting(int argc, char* argv[]);
 
+/**
+ * Parse JSON incoming message and call approtiate methods.
+ * @param msg
+ */
+void readMessage(std::string msg);
 
+Json::Value initValue();
 
 
 
