@@ -6,8 +6,7 @@
 #include <netdb.h>
 #include <string>
 
-#define DEFAULT_SERVER_IP 192.168.1.3
-#define DEFAULT_SOCKET_PORT 3000
+
 
 /**
  * @brief Init the network configuration.
@@ -51,7 +50,6 @@ extern pthread_mutex_t mutex_buf;
 extern bool messageReceived;
 extern char receivingBuffer[1000];
 extern pthread_t receivingThread;
-
 
 #endif	/* NETWORK_H */
 

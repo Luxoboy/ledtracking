@@ -12,6 +12,7 @@
 #include <opencv2/features2d/features2d.hpp>
 
 #include "network.h"
+#include "Robot.h"
 
 #define CAPTURE_PATH "/home/pi/ram/capture.jpg"
 #define SLEEP_MILLI 250
@@ -155,7 +156,7 @@ void argSetting(int argc, char* argv[])
     else
     {
         cout << "No address IP passed, setting default value." << endl;
-        server_IP = DEFAULT_SERVER_IP;
+        server_IP = "192.168.1.3";
     }
 
 
@@ -164,7 +165,7 @@ void argSetting(int argc, char* argv[])
         socket_port = argv[2];
     else
     {
-        socket_port = DEFAULT_SOCKET_PORT;
+        socket_port = "3000";
         cout << "No socket port passed, setting default value." << endl;
     }
 
