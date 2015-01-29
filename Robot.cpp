@@ -94,3 +94,11 @@ bool Robot::tryPosition(double x, double y)
     return true;
 }
 
+Robot& Robot::getRobot(uint id)
+{
+    if(id >= 0 && id < robots.size())
+    {
+        return robots.at(id);
+    }
+}
+

@@ -26,6 +26,8 @@ public:
     Robot(const Robot& orig);
     virtual ~Robot();
     
+    static Robot& getRobot(uint id);
+    
     int getId() const
     {
         return id;
