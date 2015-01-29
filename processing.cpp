@@ -178,7 +178,6 @@ string calibrate(double value)
             ret = "Moins de deux points détectés";
             continue;
         }
-        int x[2], y[2];
         vector<Moments>::iterator it = vec_moments.begin();
         Point p = extractCoordinates(*it), p2 = extractCoordinates(*(++it));
         
