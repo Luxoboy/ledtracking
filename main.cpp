@@ -23,12 +23,10 @@ int raspiStillPID = -1; //The PID of the child process exectuting raspistill.
 int main(int argc, char** argv)
 {
     string json_test = "{\"valeur\":25.3,\"action\":\"calibrage\"}";
-    
-    Json::Reader r;
-    Json::Value val;
-    r.parse(json_test, val);
-    cout << val["valeur"].asDouble();
+    forkRaspistill();
     readMessage(json_test);
+    
+    killRaspistill();
     return 0;
 }
 
@@ -120,8 +118,8 @@ void readMessage(string msg)
             Json::Value answer = initValue();
             answer["action"] = "calibrage";
             Json::StyledWriter writer;
-            Json::Value value = root["value"];
-            if(not value.isNull() && value.isDouble())
+            Json::Value value = root["valeur"];
+            if(!value.isNull() && value.isDouble())
             {
                 string ret = calibrate(value.asDouble());
                 if(ret != "")
@@ -149,4 +147,16 @@ Json::Value initValue()
     Json::Value val;
     val["idModule"] = "localisation";
     return val;
+}
+
+void killRaspistill()
+{
+    if(kill(raspiStillPID, SIGKILL) < 0)
+    {
+        cerr << "Error killing raspistill process. Please kill manually." << endl;
+    }
+    else
+    {
+        cout << "Killed raspistill process successfully." << endl;
+    }
 }

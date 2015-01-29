@@ -137,7 +137,7 @@ void extractMoments(vector<Moments>& vec_moments, Mat& img)
     drawContours(img, contours, -1, Scalar(255, 0, 0));
     imwrite("/home/pi/ram/contours.jpg", img);
 
-    cout << "Contours foud: " << contours.size() << endl;
+    cout << "Contours found: " << contours.size() << endl;
 
     vec_moments.clear();
     vec_moments.reserve(contours.size());
@@ -163,11 +163,13 @@ bool sortMoments(const Moments& m1, const Moments m2)
 
 string calibrate(double value)
 {
+    cout << "[CALIBRATE] Entering calibrating mode with value = " << value << endl;
     string ret = "";
     int failures = -1;
     vector<Moments> vec_moments;
     while ((failures++) < MAX_CALIBRATE_FAILURES)
     {
+        cout << "[CALIBRATE] Attempt number " << failures+1 << endl;
         Mat img;
         captureSignal();
         captureFrame(img);
@@ -181,7 +183,11 @@ string calibrate(double value)
         vector<Moments>::iterator it = vec_moments.begin();
         Point p = extractCoordinates(*it), p2 = extractCoordinates(*(++it));
         
-        double distance = sqrt(pow(p.x - p2.x, 2) + pow(p2.y - p2.y, 2));
+        cout << "[CALIBRATE] Points found: " << p.x << ", " << p.y << endl <<
+                "and " << p2.x << ", " << p2.y << endl;
+        
+        double distance = sqrt(pow(p.x - p2.x, 2) + pow(p.y - p2.y, 2));
+        cout << "Distance between the two points in px: " << distance << endl;
         Robot::setRatio(distance/value);
         ret = "";
         break;

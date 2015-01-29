@@ -40,7 +40,7 @@ Robot::~Robot()
 
 void Robot::setRatio(double ratio)
 {
-    cout << "[ROBOT] Ration changed to " << ratio << endl;
+    cout << "[ROBOT] Ratio changed to " << ratio << endl;
     Robot::ratio = ratio;
 }
 

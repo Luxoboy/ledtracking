@@ -1,6 +1,8 @@
 #ifndef GLOBAL_H
 #define	GLOBAL_H
 
+#include "json/json.h"
+
 #define CAPTURE_PATH "/home/pi/ram/capture.jpg"
 
 #define CAPTURE_WIDTH_DEFAULT 800
@@ -17,6 +19,8 @@ extern int raspiStillPID; //The PID of the child process exectuting raspistill.
  * will execute raspistill.
  */
 void forkRaspistill();
+
+void killRaspistill();
 
 /**
  * @brief Capture new picture.
