@@ -1,5 +1,6 @@
 #include "network.h"
 #include "json/json.h"
+#include "global.h"
 
 #include <iostream>
 
@@ -31,6 +32,7 @@ void *recvThread(void *arg)
             buf[res] = '\0';
             messageReceived = true;
             cout << "Message received:\n" << buf <<endl;
+            readMessage(buf);
         }
         pthread_mutex_unlock(&mutex_buf);
     }
