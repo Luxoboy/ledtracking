@@ -33,6 +33,8 @@ void *recvThread(void *arg)
         }
         pthread_mutex_unlock(&mutex_buf);
     }
+    
+    return 0;
 }
 
 bool initNetwork()
@@ -98,7 +100,7 @@ bool send(string msg)
 
     int res = send(socket_d, msg.c_str(), msg.size(), 0);
 
-    if (res != msg.size())
+    if ((uint)res != msg.size())
     {
         cerr << "Error occured when sending message to server." << endl;
         return false;
