@@ -6,7 +6,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
-#define MAX_FAILURES 500
+#define MAX_OPEN_FAILURES 500
+#define MAX_CALIBRATE_FAILURES 3
 
 /**
  * @brief Processes the image and update the robots' coordinates.
@@ -56,5 +57,15 @@ std::vector<cv::Moments>& computeMoments(std::vector<cv::Moments>& vec_moments, 
  * Change image to HSV and apply threshold.
  */
 void prepareImage(cv::Mat& imgOriginal);
+
+
+/**
+ * Calibrates tracking system and sets Robots' ratio.
+ * @param value
+ * @return 
+ */
+std::string calibrate(double value);
+
+cv::Point extractCoordinates(cv::Moments& m);
 #endif	/* PROCESSING_H */
 

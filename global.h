@@ -33,7 +33,13 @@ bool captureSignal();
  */
 void argSetting(int argc, char* argv[]);
 
+/**
+ * Parse JSON incoming message and call approtiate methods.
+ * @param msg
+ */
+void readMessage(std::string msg);
 
+Json::Value initValue();
 
 
 

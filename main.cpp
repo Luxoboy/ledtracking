@@ -10,6 +10,7 @@
 #include "Robot.h"
 #include "global.h"
 #include "processing.h"
+#include "json/json.h"
 
 using namespace std;
 
@@ -21,48 +22,14 @@ int raspiStillPID = -1; //The PID of the child process exectuting raspistill.
 
 int main(int argc, char** argv)
 {
-    argSetting(argc, argv);
+    string json_test = "{\"valeur\":25.3,\"action\":\"calibrage\"}";
     
-    mutex_buf = PTHREAD_MUTEX_INITIALIZER;
-    messageReceived = false;
-
-    if (pthread_mutex_init(&mutex_buf, NULL) != 0)
-    {
-        cerr << "Error while intializing buffer mutex.\nExiting..." << endl;
-        return 0;
-    }
-
-
-    cout << "- - - - - - - - - -" << endl <<
-            "Params :\n"
-            "Capture path: " << CAPTURE_PATH << endl <<
-            "Captured image: width=" << CAPTURE_WIDTH << "px, height=" <<
-            CAPTURE_HEIGHT << endl <<
-            "Server IP: " << server_IP << endl <<
-            "Socket port used: " << socket_port << endl <<
-            "- - - - - - - - - -" << endl << endl;
-
-    if (!initNetwork())
-    {
-        cerr << "Error occured while initializing network configuration." << endl
-                << "Exiting..." << endl;
-        return 0;
-    }
-
-    if (pthread_create(&receivingThread, NULL, recvThread, receivingBuffer) != 0)
-    {
-        cerr << "Error while creating receiving thread.\nExiting..." << endl;
-        return 0;
-    }
-
-    forkRaspistill();
-    Robot::setRatio(427);
-    Robot* r = new Robot(0,0), *r2 = new Robot(10,10);
-    
-    captureLoop();
-
+    Json::Reader r;
+    Json::Value val;
+    r.parse(json_test, val);
+    cout << val["valeur"].asDouble();
+    readMessage(json_test);
     return 0;
-
 }
 
 void argSetting(int argc, char* argv[])
@@ -132,4 +99,54 @@ bool captureSignal()
         ret = false;
     }
     return ret;
+}
+
+void readMessage(string msg)
+{
+    Json::Reader reader;
+    Json::Value root;
+    
+    if(!reader.parse(msg, root, false))
+    {
+        cout << "Received message could not be parsed as JSON!" << endl;
+    }
+    
+    Json::Value action = root["action"];
+    if(not action.isNull() && action.isString())
+    {
+        string actionString = action.asString();
+        if(actionString == "calibrage")
+        {
+            Json::Value answer = initValue();
+            answer["action"] = "calibrage";
+            Json::StyledWriter writer;
+            Json::Value value = root["value"];
+            if(not value.isNull() && value.isDouble())
+            {
+                string ret = calibrate(value.asDouble());
+                if(ret != "")
+                {
+                    answer["value"] = "NOK";
+                    answer["message"] = ret;
+                }
+                else
+                {
+                    answer["value"] = "OK";
+                }
+                send(writer.write(answer));
+            }
+            else
+            {
+                cout << "[JSON] Incorrect value for value field in calibrate action" <<
+                        endl;
+            }
+        }
+    }
+}
+
+Json::Value initValue()
+{
+    Json::Value val;
+    val["idModule"] = "localisation";
+    return val;
 }
