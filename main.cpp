@@ -133,3 +133,65 @@ bool captureSignal()
     }
     return ret;
 }
+
+void readMessage(string msg)
+{
+    Json::Reader reader;
+    Json::Value root;
+    
+    if(!reader.parse(msg, root, false))
+    {
+        cout << "Received message could not be parsed as JSON!" << endl;
+    }
+    
+    Json::Value action = root["action"];
+    if(not action.isNull() && action.isString())
+    {
+        string actionString = action.asString();
+        if(actionString == "calibrage")
+        {
+            Json::Value answer = initValue();
+            answer["action"] = "calibrage";
+            Json::StyledWriter writer;
+            Json::Value value = root["valeur"];
+            if(!value.isNull() && value.isDouble())
+            {
+                string ret = calibrate(value.asDouble());
+                if(ret != "")
+                {
+                    answer["value"] = "NOK";
+                    answer["message"] = ret;
+                }
+                else
+                {
+                    answer["value"] = "OK";
+                }
+                send(writer.write(answer));
+            }
+            else
+            {
+                cout << "[JSON] Incorrect value for value field in calibrate action" <<
+                        endl;
+            }
+        }
+    }
+}
+
+Json::Value initValue()
+{
+    Json::Value val;
+    val["idModule"] = "localisation";
+    return val;
+}
+
+void killRaspistill()
+{
+    if(kill(raspiStillPID, SIGKILL) < 0)
+    {
+        cerr << "Error killing raspistill process. Please kill manually." << endl;
+    }
+    else
+    {
+        cout << "Killed raspistill process successfully." << endl;
+    }
+}
