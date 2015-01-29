@@ -38,7 +38,6 @@ int main(int argc, char** argv)
             "Capture path: " << CAPTURE_PATH << endl <<
             "Captured image: width=" << CAPTURE_WIDTH << "px, height=" <<
             CAPTURE_HEIGHT << endl <<
-            "Sleep time between captures (ms):" << SLEEP_MILLI << endl <<
             "Server IP: " << server_IP << endl <<
             "Socket port used: " << socket_port << endl <<
             "- - - - - - - -" << endl << endl;

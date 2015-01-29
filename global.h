@@ -2,7 +2,6 @@
 #define	GLOBAL_H
 
 #define CAPTURE_PATH "/home/pi/ram/capture.jpg"
-#define SLEEP_MILLI 250
 
 #define CAPTURE_WIDTH_DEFAULT 800
 #define CAPTURE_HEIGHT_DEFAULT 800

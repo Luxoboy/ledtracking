@@ -3,7 +3,6 @@
 #include "network.h"
 #include "Robot.h"
 
-
 #include <iostream>
 #include <thread>
 
@@ -114,8 +113,6 @@ void captureLoop()
         } while (true);
 
         processImage(imgOriginal);
-
-        //std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_MILLI));
     }
 }
 
