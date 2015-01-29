@@ -58,9 +58,11 @@ void Robot::setPosition(int x_current, int y_current)
 
 string Robot::toJSON()
 {
-    string ret = "[";
+    string ret = "{\"id\":";
+    ret += to_string(id);
+    ret += ",\"x\":";
     ret += to_string((double) (this->x_current) / ratio) + ",";
-    ret += to_string((double) (this->y_current) / ratio) + "]";
+    ret += "\"y\":"+to_string((double) (this->y_current) / ratio) + "}";
     return ret;
 }
 
