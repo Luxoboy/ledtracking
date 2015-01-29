@@ -39,6 +39,11 @@ Robot::~Robot()
 {
 }
 
+void Robot::setRatio(double ratio)
+{
+    Robot::ratio = ratio;
+}
+
 void Robot::setPosition(int x_current, int y_current)
 {
     if (x_current > 0)
@@ -75,7 +80,7 @@ string Robot::robotsToJSON()
         ret += ",";
     }
     ret.back() = ']';
-    ret += "}";
+    ret += "}\n";
     return ret;
 }
 
@@ -96,9 +101,16 @@ bool Robot::tryPosition(double x, double y)
 
 Robot& Robot::getRobot(uint id)
 {
-    if(id >= 0 && id < robots.size())
+    if(id < robots.size())
     {
-        return robots.at(id);
+        return *robots.at(id);
     }
+    return *robots.at(0);
 }
+
+uint Robot::numberOfRobots()
+    {
+        cout << "Number of robots: " << robots.size() << endl;
+        return robots.size();
+    }
 

@@ -1,5 +1,8 @@
 #include "processing.h"
 #include "global.h"
+#include "network.h"
+#include "Robot.h"
+
 
 #include <iostream>
 #include <thread>
@@ -23,15 +26,19 @@ void processImage(Mat &imgOriginal)
     findContours(imgThresholded, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
     cout << "Contours foud: " << contours.size() << endl;
+    
+    vector<Moments> vec_moments(contours.size());
+    
+    computeMoments(vec_moments, contours);
+    
+    uint ind_robot = 0;
 
-    for (vector<Point> vec : contours)
+    for (Moments m : vec_moments)
     {
 
-        Moments omoments = moments(vec);
-
-        double dM01 = omoments.m01;
-        double dM10 = omoments.m10;
-        double dArea = omoments.m00;
+        double dM01 = m.m01;
+        double dM10 = m.m10;
+        double dArea = m.m00;
         cout << "dArea" << dArea << endl;
         int posX, posY;
         if (dArea != 0)
@@ -39,15 +46,16 @@ void processImage(Mat &imgOriginal)
             //calculate the position of the ball
             posX = dM10 / dArea;
             posY = dM01 / dArea;
-        } else
-        {
-            posX = vec.at(0).x;
-            posY = vec.at(0).y;
+            Robot r = Robot::getRobot(ind_robot);
+            r.tryPosition(posX, posY);
+            
+            if(++ind_robot == Robot::numberOfRobots())
+                break;
         }
-
+        
         cout << "x: " << posX << ", y: " << posY << endl;
     }
-
+    send(Robot::robotsToJSON());
     drawContours(imgOriginal, contours, -1, Scalar(255, 0, 0));
     imwrite("/home/pi/ram/contours.jpg", imgOriginal);
 }

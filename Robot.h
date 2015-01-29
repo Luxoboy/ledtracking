@@ -8,7 +8,7 @@
 #ifndef ROBOT_H
 #define	ROBOT_H
 
-#define MAX_TRAVEL_DISTANCE 0.1 // Maximum distance a robot can travel in 1 second in m.
+#define MAX_TRAVEL_DISTANCE 100 // Maximum distance a robot can travel in 1 second in m.
 
 #include <string>
 #include <vector>
@@ -48,11 +48,13 @@ public:
         return ratio;
     }
     
+    static uint numberOfRobots();
+    
     /**
      * Sets the ratio between pixels and meter.
      * @param ration
      */
-    static void setRatio(double ration);
+    static void setRatio(double ratio);
 
     
     /**

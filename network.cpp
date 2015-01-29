@@ -56,7 +56,7 @@ bool initNetwork()
     {
         return false;
     }
-    
+    send("{ \"idModule\": \"localisation\", \"action\": \"init\" }");
     return true;
 }
 
@@ -97,6 +97,8 @@ bool send(string msg)
         cerr << "Not connected to server, cannot send message." << endl;
         return false;
     }
+    
+    cout << "Trying to send following message:\n\"" << msg << "\"\n";
 
     int res = send(socket_d, msg.c_str(), msg.size(), 0);
 
