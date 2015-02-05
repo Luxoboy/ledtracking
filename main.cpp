@@ -19,16 +19,20 @@ int CAPTURE_WIDTH = CAPTURE_WIDTH_DEFAULT,
 
 int raspiStillPID = -1; //The PID of the child process exectuting raspistill.
 
+bool TRACKING = false;
+
+pthread_mutex_t MODE;
+
 int main(int argc, char** argv)
 {
     argSetting(argc, argv);
     
-    mutex_buf = PTHREAD_MUTEX_INITIALIZER;
+    MODE = PTHREAD_MUTEX_INITIALIZER;
     messageReceived = false;
 
-    if (pthread_mutex_init(&mutex_buf, NULL) != 0)
+    if (pthread_mutex_init(&MODE, NULL) != 0)
     {
-        cerr << "Error while intializing buffer mutex.\nExiting..." << endl;
+        cerr << "Error while intializing mode mutex.\nExiting..." << endl;
         return 0;
     }
 
@@ -147,15 +151,18 @@ void readMessage(string msg)
     Json::Value action = root["action"];
     if(not action.isNull() && action.isString())
     {
+        pthread_mutex_lock(&MODE);
         string actionString = action.asString();
         if(actionString == "calibrage")
         {
             Json::Value answer = initValue();
             answer["action"] = "calibrage";
-            Json::StyledWriter writer;
+            Json::FastWriter writer;
             Json::Value value = root["valeur"];
+            
             if(!value.isNull() && value.isDouble())
             {
+                TRACKING = false;
                 string ret = calibrate(value.asDouble());
                 if(ret != "")
                 {
@@ -174,6 +181,15 @@ void readMessage(string msg)
                         endl;
             }
         }
+        else if(actionString == "start")
+        {
+            TRACKING = true;
+        }
+        else if(actionString == "stop")
+        {
+            TRACKING = false;
+        }
+        pthread_mutex_unlock(&MODE);
     }
 }
 

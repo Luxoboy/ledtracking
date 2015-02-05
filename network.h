@@ -46,7 +46,6 @@ extern struct addrinfo host_info; // The struct that getaddrinfo() fills up with
 extern struct addrinfo *host_info_list; // Pointer to the to the linked list of host_info's.
 extern std::string server_IP, socket_port;
 extern int socket_d; // Socket descriptor
-extern pthread_mutex_t mutex_buf;
 extern bool messageReceived;
 extern char receivingBuffer[1000];
 extern pthread_t receivingThread;

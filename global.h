@@ -10,8 +10,11 @@
 
 extern int CAPTURE_WIDTH, CAPTURE_HEIGHT;
 
-
 extern int raspiStillPID; //The PID of the child process exectuting raspistill.
+
+extern bool TRACKING; //Indicates whether the program sould be tracking robots.
+
+extern pthread_mutex_t MODE; //Used to synchronize network and main threads.
 
 /**
  * @brief Fork process and execute raspistill.

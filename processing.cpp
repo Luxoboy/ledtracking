@@ -87,9 +87,18 @@ void captureLoop()
     Mat imgOriginal;
     while (true)
     {
-        captureFrame(imgOriginal);
-        capturedFrames++;
-        processImage(imgOriginal);
+        pthread_mutex_lock(&MODE);
+        if(TRACKING)
+        {
+            pthread_mutex_unlock(&MODE);
+            captureFrame(imgOriginal);
+            capturedFrames++;
+            processImage(imgOriginal);
+        }
+        else
+        {
+            pthread_mutex_unlock(&MODE);
+        }
     }
 }
 

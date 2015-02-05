@@ -11,7 +11,6 @@ struct addrinfo host_info; // The struct that getaddrinfo() fills up with data.
 struct addrinfo *host_info_list; // Pointer to the to the linked list of host_info's.
 std::string server_IP, socket_port;
 int socket_d; // Socket descriptor
-pthread_mutex_t mutex_buf;
 bool messageReceived;
 char receivingBuffer[1000];
 pthread_t receivingThread;
@@ -24,7 +23,6 @@ void *recvThread(void *arg)
     cout<< "Listening thread created successfully.\nListening...\n";
     while(true)
     {
-        pthread_mutex_lock(&mutex_buf);
         int res = recv(socket_d_loc, buf, 1000, MSG_DONTWAIT);
         
         if(res != -1)
@@ -34,7 +32,6 @@ void *recvThread(void *arg)
             cout << "Message received:\n" << buf <<endl;
             readMessage(buf);
         }
-        pthread_mutex_unlock(&mutex_buf);
     }
     
     return 0;
@@ -59,7 +56,7 @@ bool initNetwork()
     {
         return false;
     }
-    send("{ \"idModule\": \"localisation\", \"action\": \"init\" }");
+    send("{ \"idModule\": \"localisation\", \"action\": \"init\" }\n");
     return true;
 }
 
