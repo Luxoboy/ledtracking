@@ -88,6 +88,8 @@ void captureLoop()
     while (true)
     {
         pthread_mutex_lock(&MODE);
+        if(status == -1)
+            return;
         if(TRACKING)
         {
             pthread_mutex_unlock(&MODE);

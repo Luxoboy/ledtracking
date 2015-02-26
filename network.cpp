@@ -25,6 +25,17 @@ void *recvThread(void *arg)
     {
         int res = recv(socket_d_loc, buf, 1000, MSG_DONTWAIT);
         
+        if (res == 0)
+        {
+            cerr << "Connexion was shut down by server." << endl;
+            pthread_mutex_lock(&MODE);
+            status = -1;
+            closeSocket();
+            pthread_mutex_unlock(&MODE);
+            
+            pthread_exit(NULL);
+        }
+        
         if(res != -1)
         {
             buf[res] = '\0';
@@ -73,6 +84,17 @@ bool createSocket()
     }
 
     cout << "Socket created successfully." << endl;
+    return true;
+}
+
+bool closeSocket()
+{
+    if(close(socket_d) != 0)
+    {
+        perror("Closing socket");
+        return false;
+    }
+    cout << "Socket closed successfully.\n";
     return true;
 }
 

@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include <pthread.h>
+#include <bits/signum.h>
 
 #include "network.h"
 #include "Robot.h"
@@ -25,6 +26,16 @@ pthread_mutex_t MODE;
 
 int main(int argc, char** argv)
 {
+    if(signal(SIGINT, SIGINT_handler) != SIG_ERR)
+    {
+        cout << "Signal handling correctly set.\n";
+    }
+    else
+    {
+        perror("SIGIN handling");
+        cerr << "Failed trying to handle SIGINT. Exiting.\n";
+        return 0;
+    }
     argSetting(argc, argv);
     
     MODE = PTHREAD_MUTEX_INITIALIZER;
@@ -64,6 +75,9 @@ int main(int argc, char** argv)
     Robot* r = new Robot(0,0), *r2 = new Robot(10,10);
     
     captureLoop();
+    
+    killRaspistill();
+    closeSocket();
 
     return 0;
 
@@ -166,12 +180,12 @@ void readMessage(string msg)
                 string ret = calibrate(value.asDouble());
                 if(ret != "")
                 {
-                    answer["value"] = "NOK";
+                    answer["statut"] = "NOK";
                     answer["message"] = ret;
                 }
                 else
                 {
-                    answer["value"] = "OK";
+                    answer["statut"] = "OK";
                 }
                 send(writer.write(answer));
             }
@@ -210,4 +224,11 @@ void killRaspistill()
     {
         cout << "Killed raspistill process successfully." << endl;
     }
+}
+
+void SIGINT_handler(int sig)
+{
+    pthread_mutex_lock(&MODE);
+    status = -1;
+    pthread_mutex_unlock(&MODE);
 }

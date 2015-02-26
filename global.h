@@ -46,6 +46,12 @@ void argSetting(int argc, char* argv[]);
  */
 void readMessage(std::string msg);
 
+/**
+ * Handles SIGINT signal. Sets status to -1;
+ * @param 
+ */
+void SIGINT_handler(int);
+
 Json::Value initValue();
 
 

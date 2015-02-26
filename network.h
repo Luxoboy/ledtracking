@@ -5,6 +5,7 @@
 #include <sys/socket.h> // Needed for the socket functions
 #include <netdb.h>
 #include <string>
+#include <unistd.h>
 
 
 
@@ -20,6 +21,12 @@ bool initNetwork();
  * @return True if successfully created.
  */
 bool createSocket();
+
+/**
+ * Closes socket.
+ * @return True if successfull, false if an error occured.
+ */
+bool closeSocket();
 
 /**
  * @brief Connects to the server.
