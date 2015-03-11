@@ -72,7 +72,6 @@ int main(int argc, char** argv)
 
     forkRaspistill();
     Robot::setRatio(427);
-    Robot* r = new Robot(0,0), *r2 = new Robot(10,10);
     
     captureLoop();
     
@@ -172,12 +171,13 @@ void readMessage(string msg)
             Json::Value answer = initValue();
             answer["action"] = "calibrage";
             Json::FastWriter writer;
-            Json::Value value = root["valeur"];
+            Json::Value value = root["valeur"], nbRobots = root["nbRobots"];
             
-            if(!value.isNull() && value.isDouble())
+            if(!value.isNull() && !nbRobots.isNull() && value.isDouble() &&
+                    nbRobots.isInt())
             {
                 TRACKING = false;
-                string ret = calibrate(value.asDouble());
+                string ret = calibrate(value.asDouble(), nbRobots.asInt());
                 if(ret != "")
                 {
                     answer["statut"] = "NOK";
@@ -228,6 +228,7 @@ void killRaspistill()
 
 void SIGINT_handler(int sig)
 {
+    int sig2 = sig;
     pthread_mutex_lock(&MODE);
     status = -1;
     pthread_mutex_unlock(&MODE);

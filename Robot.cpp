@@ -34,9 +34,23 @@ Robot::Robot(const Robot& orig)
     y_last = orig.y_last;
 }
 
+Robot::Robot()
+{
+    cout << "[ROBOT] Added new robot, with no position." << endl;
+    setPosition(-1, -1);
+    robots.push_back(this);
+}
+
 Robot::~Robot()
 {
 }
+
+void Robot::clearRobots()
+{
+    robots.clear();
+    cout << "[ROBOT] Cleared robot list." << endl;
+}
+
 
 void Robot::setRatio(double ratio)
 {
@@ -84,15 +98,18 @@ string Robot::robotsToJSON()
 
 bool Robot::tryPosition(double x, double y)
 {
-    double travelledDistance = sqrt(pow(x - x_current, 2) + pow(y - y_current, 2));
-    duration<double> moveDuration = duration_cast<duration<double>>(steady_clock::now() - lastTime);
-
-    double durationSeconds = moveDuration.count();
-
-    if (travelledDistance > MAX_TRAVEL_DISTANCE * durationSeconds)
+    if (x_current != -1 && y_current != -1)
     {
-        cout << "[ROBOT] " << id << ": failed to update coordinates.\n";
-        return false;
+        double travelledDistance = sqrt(pow(x - x_current, 2) + pow(y - y_current, 2));
+        duration<double> moveDuration = duration_cast<duration<double>>(steady_clock::now() - lastTime);
+
+        double durationSeconds = moveDuration.count();
+
+        if (travelledDistance > MAX_TRAVEL_DISTANCE * durationSeconds)
+        {
+            cout << "[ROBOT] " << id << ": failed to update coordinates.\n";
+            return false;
+        }
     }
     setPosition(x, y);
     return true;

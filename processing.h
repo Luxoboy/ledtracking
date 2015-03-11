@@ -62,9 +62,10 @@ void prepareImage(cv::Mat& imgOriginal);
 /**
  * Calibrates tracking system and sets Robots' ratio.
  * @param value
+ * @parem nbRobots
  * @return 
  */
-std::string calibrate(double value);
+std::string calibrate(double value, int nbRobots);
 
 cv::Point extractCoordinates(cv::Moments& m);
 #endif	/* PROCESSING_H */

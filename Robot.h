@@ -24,9 +24,15 @@ public:
      */
     Robot(int x_current, int y_current);
     Robot(const Robot& orig);
+    Robot();
     virtual ~Robot();
     
     static Robot* getRobot(uint id);
+    
+    /**
+     * Clears the list of existing robots.
+     */
+    static void clearRobots();
     
     int getId() const
     {

@@ -62,7 +62,8 @@ Point extractCoordinates(Moments& m)
         ret.x = -1;
         ret.y = -1;
     }
-    cout << "[POINT] Extracted point, dArea = " << dArea << endl;
+    cout << "[POINT] Extracted point, dArea = " << dArea << 
+            "x=" << ret.x << ", y=" << ret.y <<endl;
     
     return ret;
 }
@@ -172,9 +173,12 @@ bool sortMoments(const Moments& m1, const Moments m2)
     return m1.m00 > m2.m00;
 }
 
-string calibrate(double value)
+string calibrate(double value, int nbRobots)
 {
     cout << "[CALIBRATE] Entering calibrating mode with value = " << value << endl;
+    Robot::clearRobots();
+    for(int i=0; i < nbRobots; i++)
+        new Robot();
     string ret = "";
     int failures = -1;
     vector<Moments> vec_moments;
