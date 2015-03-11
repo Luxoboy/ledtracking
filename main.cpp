@@ -71,7 +71,6 @@ int main(int argc, char** argv)
     }
 
     forkRaspistill();
-    Robot::setRatio(427);
     
     captureLoop();
     
@@ -228,7 +227,6 @@ void killRaspistill()
 
 void SIGINT_handler(int sig)
 {
-    int sig2 = sig;
     pthread_mutex_lock(&MODE);
     status = -1;
     pthread_mutex_unlock(&MODE);

@@ -104,8 +104,12 @@ bool Robot::tryPosition(double x, double y)
         duration<double> moveDuration = duration_cast<duration<double>>(steady_clock::now() - lastTime);
 
         double durationSeconds = moveDuration.count();
+        
+        cout << "[ROBOT] " << id << "Trying to update position to x=" << x <<
+                ", y=" << y << ", duration=" << durationSeconds << "s " << 
+                "(cur x=" << x_current << ", y=" << y_current << ")." << endl;
 
-        if (travelledDistance > MAX_TRAVEL_DISTANCE * durationSeconds)
+        if (travelledDistance/ratio > MAX_TRAVEL_DISTANCE * durationSeconds)
         {
             cout << "[ROBOT] " << id << ": failed to update coordinates.\n";
             return false;
