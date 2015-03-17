@@ -86,21 +86,23 @@ void captureLoop()
 {
     int capturedFrames = 0;
     Mat imgOriginal;
-    while (true)
+    bool tracking_local = false, loop = true;
+    cout << "Entering capture loop." << endl;
+    while (loop)
     {
         pthread_mutex_lock(&MODE);
+        tracking_local = TRACKING;
         if(status == -1)
-            return;
-        if(TRACKING)
         {
-            pthread_mutex_unlock(&MODE);
+            loop = false;
+            tracking_local = false;
+        }        
+        pthread_mutex_unlock(&MODE);
+        if(tracking_local)
+        {
             captureFrame(imgOriginal);
             capturedFrames++;
             processImage(imgOriginal);
-        }
-        else
-        {
-            pthread_mutex_unlock(&MODE);
         }
     }
 }

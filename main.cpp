@@ -227,7 +227,8 @@ void killRaspistill()
 
 void SIGINT_handler(int sig)
 {
-    pthread_mutex_lock(&MODE);
+    (void)sig;
+    cout << "SIGINT caught." << endl;
     status = -1;
-    pthread_mutex_unlock(&MODE);
+    cout << "SIGINT handler is done." << endl;
 }
