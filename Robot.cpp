@@ -38,6 +38,7 @@ Robot::Robot()
 {
     cout << "[ROBOT] Added new robot, with no position." << endl;
     setPosition(-1, -1);
+    id = robots.size();
     robots.push_back(this);
 }
 
